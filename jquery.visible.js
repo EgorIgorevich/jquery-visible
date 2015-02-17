@@ -11,7 +11,7 @@
      *       only accounts for vertical position, not horizontal.
      */
     var $w = $(window);
-    $.fn.visible = function(partial,hidden,direction){
+    $.fn.visible = function(partial,hidden,direction,offset){
 
         if (this.length < 1)
             return;
@@ -23,16 +23,30 @@
             direction = (direction) ? direction : 'both',
             clientSize = hidden === true ? t.offsetWidth * t.offsetHeight : true;
 
+        var defaultOffset = 0;
+        // check if offset is a number
+        if (!isNaN(parseFloat(offset)) && isFinite(offset)) {
+          defaultOffset = offset;
+          offset = {};
+        }
+        if (typeof offset !== 'object') offset = {};
+    
+        offset = offset || {};
+        offset.top = offset.top || defaultOffset;
+        offset.bottom = offset.bottom || defaultOffset;
+        offset.left = offset.left || defaultOffset;
+        offset.right = offset.right || defaultOffset;
+    
         if (typeof t.getBoundingClientRect === 'function'){
 
-            // Use this native browser method, if available.
-            var rec = t.getBoundingClientRect(),
-                tViz = rec.top    >= 0 && rec.top    <  vpHeight,
-                bViz = rec.bottom >  0 && rec.bottom <= vpHeight,
-                lViz = rec.left   >= 0 && rec.left   <  vpWidth,
-                rViz = rec.right  >  0 && rec.right  <= vpWidth,
-                vVisible   = partial ? tViz || bViz : tViz && bViz,
-                hVisible   = partial ? lViz || rViz : lViz && rViz;
+          // Use this native browser method, if available.
+          var rec = t.getBoundingClientRect(),
+              tViz = rec.top    >= offset.top && rec.top    <  vpHeight,
+              bViz = rec.bottom >  offset.bottom && rec.bottom <= vpHeight,
+              lViz = rec.left   >= offset.left && rec.left   <  vpWidth,
+              rViz = rec.right  >  offset.right && rec.right  <= vpWidth,
+              vVisible   = partial ? tViz || bViz : tViz && bViz,
+              hVisible   = partial ? lViz || rViz : lViz && rViz;
 
             if(direction === 'both')
                 return clientSize && vVisible && hVisible;
